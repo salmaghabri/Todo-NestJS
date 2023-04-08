@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Inject } from "@nestjs/common";
 import { StatusEnum } from "../StatusEnum";
 
-export class Todo{
+export class TodoModel{
 
     id: string;
     name: string;
