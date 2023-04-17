@@ -1,4 +1,4 @@
-import { Controller,Get,Post,Delete, Body, Req,Query, Param, Patch, Put, Version } from '@nestjs/common';
+import { Controller,Get,Post,Delete, Body, Req,Query, Param, Patch, Put, Version,Headers} from '@nestjs/common';
 import { TodoModel } from './model/TodoModel.model';
 import { TodoDto } from './dto/ToDoDto.dto';
 import { UpdateTodoDto } from './dto/UpdateTodoDto';
@@ -55,8 +55,9 @@ export class TodoController {
     }
     @Post()
     @Version('2')
-    create(@Body() todo:Todo){
-        this.todoService.create(todo);
+    create(@Body() todo:Todo, @Req() req){
+        console.log("req: " ,req)
+        this.todoService.create(todo, req["userId"]);
     }
 
     //read by id
@@ -83,8 +84,9 @@ export class TodoController {
     }
     @Delete('delete/:id')
     @Version('2')
-    delete(@Param() params){
-        this.todoService.delete(params.id)
+    delete(@Param() params, @Req() req){
+        console.log("req: " ,req)
+        this.todoService.delete(params.id,req["userId"])
 
     }
     @Delete("softdelete/:id")
@@ -104,7 +106,8 @@ export class TodoController {
     }
     @Patch('update/:id')
     @Version('2')
-    update(@Param('id') id,@Body() updateTodoDto: UpdateTodoDto){
-        this.todoService.update(id,updateTodoDto); 
+    update(@Param('id') id,@Body() updateTodoDto: UpdateTodoDto, @Req() req){
+        console.log("req: " ,req)
+        this.todoService.update(id,updateTodoDto,req["userId"]); 
     }
 }

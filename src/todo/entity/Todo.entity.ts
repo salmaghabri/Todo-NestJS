@@ -20,6 +20,8 @@ createdAt: Date;
 updatedAt: Date;
 @DeleteDateColumn()
 deletedAt: Date;
+@Column()
+userId: string;
 
 
 

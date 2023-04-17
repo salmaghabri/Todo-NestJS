@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Controller,Get,Post,Delete, Body, Req, Param, Patch } from '@nestjs/common';
 import { TodoModel} from './model/TodoModel.model';
 import { Todo } from './entity/ToDo.entity' ;
@@ -129,18 +129,27 @@ export class TodoService {
 
 
     // entity todo
-    async create(todo:Todo){
-         
-        return await this.todoRepository.save(todo);
-    }
-    async update(idd: string, updateTodoDto: UpdateTodoDto){
-        const PartialTodo={
-            id: idd,
-            ...updateTodoDto
-        }
-        const todo = await this.todoRepository.preload(PartialTodo)
+    async create(newTodo:TodoDto, userId: string){
 
-        return await this.todoRepository.save(todo);
+        const todo = {
+            ...newTodo,
+            userId,
+          };
+          return await this.todoRepository.save(todo);
+        
+    }
+    async update(id: string, updateTodoDto: UpdateTodoDto,userId: string ){
+        const todo = await this.todoRepository.findOneBy({id})
+        if (!todo) {
+            throw new BadRequestException('todo does not exist');
+          }
+          if (todo.userId != userId) {
+           throw new UnauthorizedException(
+              "you cannot update this todo ",
+            );
+          }
+
+        return await this.todoRepository.update(id, {...updateTodoDto});
          
     }
     async read(){
@@ -148,9 +157,17 @@ export class TodoService {
         return await this.todoRepository.find();
          
     }
-    async delete(id: string){
-        const todo = await this.todoRepository.preload({id: id})
-        return await this.todoRepository.remove(todo)
+    async delete(id: string, userId: string){
+        const todo = await this.todoRepository.findOneBy({ id });
+    if (!todo) {
+      throw new BadRequestException('todo does not exist');
+    }
+    if (todo.userId != userId) {
+      throw new BadRequestException(
+        "you cannot delete this todo !  ",
+      );
+    }
+    return this.todoRepository.delete(id);
     }
     async softDelete(id: any) {
         return await this.todoRepository.softDelete(id)
